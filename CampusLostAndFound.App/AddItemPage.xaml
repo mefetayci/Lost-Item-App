@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CampusLostAndFound.App.AddItemPage"
+             Title="Yeni Eşya Ekle"
+             BackgroundColor="#121212">
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="15">
+            <Label Text="Eşya Bilgileri" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+            <!-- YENİ: LOKASYON/KURUM SEÇİCİ -->
+            <Label Text="Kurum / Lokasyon" FontSize="14" TextColor="LightGray" Margin="0,0,0,-10"/>
+            <Picker x:Name="InstitutionPicker" Title="Bir lokasyon seçin..." BackgroundColor="#1E1E1E" TextColor="White">
+                <Picker.Items>
+                    <x:String>Maltepe Üniversitesi</x:String>
+                    <x:String>City's AVM</x:String>
+                    <x:String>Marmaray</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Entry x:Name="TitleEntry" Placeholder="Eşya Adı (Örn: Siyah Cüzdan)" BackgroundColor="#1E1E1E" TextColor="White" />
+            <Entry x:Name="LocationEntry" Placeholder="Bulunan Yer (Örn: MZ-1 Sınıfı veya 2. Kat Tuvalet)" BackgroundColor="#1E1E1E" TextColor="White" />
+            <Entry x:Name="FinderEntry" Placeholder="Bulan Kişi Adı" BackgroundColor="#1E1E1E" TextColor="White" />
+
+            <Label Text="Güvenlik (Sadece Görevli Görebilir)" FontSize="18" FontAttributes="Bold" TextColor="#512BD4" Margin="0,10,0,0" />
+            <Editor x:Name="SecretFeaturesEntry" Placeholder="Eşyanın gizli özellikleri (Örn: İçinde 200 TL var, ekranı çatlak)" BackgroundColor="#1E1E1E" TextColor="White" HeightRequest="80" />
+
+            <Image x:Name="SelectedImage" HeightRequest="150" BackgroundColor="#2D2D2D" Margin="0,10,0,0" />
+            <Button Text="Fotoğraf Seç" Clicked="OnPickImageClicked" BackgroundColor="#333333" TextColor="White" />
+
+            <Button Text="Kaydet" Clicked="OnSaveButtonClicked" BackgroundColor="#28a745" TextColor="White" CornerRadius="10" Margin="0,20,0,0" HeightRequest="50" FontSize="18" FontAttributes="Bold" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

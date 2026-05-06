@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CampusLostAndFound.API/CampusLostAndFound.API.csproj" />
+  <Project Path="CampusLostAndFound.App/CampusLostAndFound.App.csproj" Id="201cf728-b450-4830-b4a1-f2e207bd8a71">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>
