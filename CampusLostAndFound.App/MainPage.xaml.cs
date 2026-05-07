@@ -5,10 +5,11 @@ namespace CampusLostAndFound.App
 {
     public partial class MainPage : ContentPage
     {
+        // Tüm uygulama genelinde giriş yapılıp yapılmadığını tutan statik (kalıcı) değişkenler
+        public static bool GlobalIsAdmin = false;
+        public static string GlobalAdminLocation = string.Empty;
+
         private List<Item> _allItems = new List<Item>();
-        private bool _isUserLoggedIn = false;
-        private bool _isAdmin = false;
-        private string _adminLocation = string.Empty;
         private int _itemToHandoverId;
 
         public MainPage()
@@ -20,58 +21,24 @@ namespace CampusLostAndFound.App
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+
+            // Eğer LoginPage üzerinden giriş yapıldıysa, arayüzü görevliye göre evrimleştir:
+            if (GlobalIsAdmin)
+            {
+                CorporateLoginButton.IsVisible = false; // Giriş butonunu sakla
+                FilterPicker.IsVisible = false; // Filtreyi sakla
+                AdminAddButton.IsVisible = true; // Eşya ekle butonunu göster
+                PageTitleLabel.Text = $"{GlobalAdminLocation} Paneli"; // Başlığı kuruma özel yap
+            }
+
+            // Verileri her açılışta güncel yetkiyle çek
             await LoadItemsFromApi();
-
-            if (_isUserLoggedIn) return;
-
-            bool isAdminChoice = await DisplayAlert("Hoş Geldiniz", "Sisteme nasıl giriş yapmak istiyorsunuz?", "Görevli", "Kullanıcı");
-
-            if (isAdminChoice)
-            {
-                LoginOverlay.IsVisible = true;
-            }
-            else
-            {
-                _isUserLoggedIn = true;
-            }
         }
 
-        private async void OnLoginConfirmClicked(object sender, EventArgs e)
+        private async void OnCorporateLoginClicked(object sender, EventArgs e)
         {
-            if (PasswordEntry.Text == "maltepe") _adminLocation = "Maltepe Üniversitesi";
-            else if (PasswordEntry.Text == "citys") _adminLocation = "City's AVM";
-            else if (PasswordEntry.Text == "marmaray") _adminLocation = "Marmaray";
-            else _adminLocation = string.Empty;
-
-            if (!string.IsNullOrEmpty(_adminLocation))
-            {
-                LoginOverlay.IsVisible = false;
-                AdminAddButton.IsVisible = true;
-
-                FilterPicker.IsVisible = false;
-                PageTitleLabel.Text = $"{_adminLocation} Paneli";
-
-                _isAdmin = true;
-                _isUserLoggedIn = true;
-
-                // ÇÖZÜM BURADA: Sadece filtreyi uygulamak yerine verileri görevli yetkisiyle baştan yüklüyoruz.
-                // Böylece "Sahibine Teslim Et" butonları anında görünür hale geliyor.
-                await LoadItemsFromApi();
-
-                PasswordEntry.Text = string.Empty;
-            }
-            else
-            {
-                await DisplayAlert("Hata", "Hatalı şifre girdiniz!", "Tamam");
-                PasswordEntry.Text = string.Empty;
-            }
-        }
-
-        private void OnLoginCancelClicked(object sender, EventArgs e)
-        {
-            LoginOverlay.IsVisible = false;
-            PasswordEntry.Text = string.Empty;
-            _isUserLoggedIn = true;
+            // Gizli giriş sayfasına yönlendir
+            await Navigation.PushAsync(new LoginPage());
         }
 
         private async Task LoadItemsFromApi()
@@ -84,7 +51,7 @@ namespace CampusLostAndFound.App
 
                 foreach (var item in items)
                 {
-                    item.IsAdminMode = _isAdmin;
+                    item.IsAdminMode = GlobalIsAdmin;
                 }
 
                 _allItems = items;
@@ -98,7 +65,7 @@ namespace CampusLostAndFound.App
 
         private async void OnAddButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new AddItemPage(_adminLocation));
+            await Navigation.PushAsync(new AddItemPage(GlobalAdminLocation));
         }
 
         private void ApplyFilters()
@@ -106,9 +73,9 @@ namespace CampusLostAndFound.App
             var keyword = ItemSearchBar.Text?.ToLower() ?? string.Empty;
             var filteredItems = _allItems.AsEnumerable();
 
-            if (_isAdmin)
+            if (GlobalIsAdmin)
             {
-                filteredItems = filteredItems.Where(i => i.category == _adminLocation);
+                filteredItems = filteredItems.Where(i => i.category == GlobalAdminLocation);
             }
             else
             {
@@ -134,7 +101,7 @@ namespace CampusLostAndFound.App
 
         private async void OnItemTapped(object sender, TappedEventArgs e)
         {
-            if (!_isAdmin) return;
+            if (!GlobalIsAdmin) return;
             var tappedItem = e.Parameter as Item;
             if (tappedItem != null)
             {
