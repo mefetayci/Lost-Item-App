@@ -5,7 +5,6 @@ namespace CampusLostAndFound.App
 {
     public partial class MainPage : ContentPage
     {
-        // Tüm uygulama genelinde giriş yapılıp yapılmadığını tutan statik (kalıcı) değişkenler
         public static bool GlobalIsAdmin = false;
         public static string GlobalAdminLocation = string.Empty;
 
@@ -22,22 +21,19 @@ namespace CampusLostAndFound.App
         {
             base.OnAppearing();
 
-            // Eğer LoginPage üzerinden giriş yapıldıysa, arayüzü görevliye göre evrimleştir:
             if (GlobalIsAdmin)
             {
-                CorporateLoginButton.IsVisible = false; // Giriş butonunu sakla
-                FilterPicker.IsVisible = false; // Filtreyi sakla
-                AdminAddButton.IsVisible = true; // Eşya ekle butonunu göster
-                PageTitleLabel.Text = $"{GlobalAdminLocation} Paneli"; // Başlığı kuruma özel yap
+                CorporateLoginButton.IsVisible = false;
+                FilterPicker.IsVisible = false;
+                AdminAddButton.IsVisible = true;
+                PageTitleLabel.Text = $"{GlobalAdminLocation} Paneli";
             }
 
-            // Verileri her açılışta güncel yetkiyle çek
             await LoadItemsFromApi();
         }
 
         private async void OnCorporateLoginClicked(object sender, EventArgs e)
         {
-            // Gizli giriş sayfasına yönlendir
             await Navigation.PushAsync(new LoginPage());
         }
 
@@ -46,7 +42,8 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                string response = await client.GetStringAsync("https://localhost:7293/api/Items");
+                // Link localhost olarak güncellendi
+                string response = await client.GetStringAsync("http://localhost:5280/api/Items");
                 var items = JsonSerializer.Deserialize<List<Item>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 foreach (var item in items)
@@ -128,7 +125,8 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                var response = await client.DeleteAsync($"https://localhost:7293/api/Items/{_itemToHandoverId}");
+                // Link localhost olarak güncellendi
+                var response = await client.DeleteAsync($"http://localhost:5280/api/Items/{_itemToHandoverId}");
                 if (response.IsSuccessStatusCode)
                 {
                     await DisplayAlert("Başarılı", "Eşya teslim edildi.", "Tamam");
@@ -150,7 +148,10 @@ namespace CampusLostAndFound.App
         public string location { get; set; } = string.Empty;
         public string finderName { get; set; } = string.Empty;
         public string imageUrl { get; set; } = "yok.jpg";
-        public string FullImageUrl => $"https://localhost:7293/uploads/{imageUrl}";
+
+        // Link localhost olarak güncellendi
+        public string FullImageUrl => $"http://localhost:5280/api/Items/proxy/{imageUrl}";
+
         public string secretAnswer { get; set; } = string.Empty;
         public bool IsAdminMode { get; set; }
     }
