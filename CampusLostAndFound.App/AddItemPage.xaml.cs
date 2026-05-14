@@ -8,16 +8,21 @@ namespace CampusLostAndFound.App
         private string _uploadedFileName = "yok.jpg";
         private string _adminLocation;
 
-        private readonly List<string> _highValueKeywords = new List<string>
+        // SADECE FOTOĞRAF YÜKLEMEYİ ENGELLEYENLER (Başlığa yazmak serbest)
+        private readonly List<string> _noPhotoKeywords = new List<string>
         {
             "telefon", "bilgisayar", "laptop", "tablet", "ipad", "macbook", "dizüstü",
-            "kulaklık", "airpods", "akıllı saat", "apple watch", "kamera",
-            "takı", "yüzük", "kolye", "küpe", "bileklik", "saat",
-            "pırlanta", "altın", "gümüş", "elmas",
-            "cüzdan", "para", "nakit", "dolar", "euro",
-            "kimlik", "pasaport", "ehliyet", "kredi kartı", "kart"
+            "airpods", "akıllı saat", "apple watch", "kamera",
+            "pırlanta", "altın", "gümüş", "elmas"
         };
 
+        // BAŞLIĞA YAZILMASI KESİNLİKLE YASAK OLANLAR (Sadece çok değerli materyaller)
+        private readonly List<string> _forbiddenTitleKeywords = new List<string>
+        {
+            "pırlanta", "altın", "gümüş", "elmas"
+        };
+
+        // BAŞLIKTA YASAK OLAN MARKALAR
         private readonly List<string> _brandKeywords = new List<string>
         {
             "apple", "iphone", "macbook", "ipad", "airpods", "samsung", "galaxy",
@@ -35,27 +40,27 @@ namespace CampusLostAndFound.App
             InstitutionPicker.IsEnabled = false;
         }
 
-        private bool IsHighValueItem()
+        private bool IsPhotoRestricted()
         {
             string title = TitleEntry.Text?.ToLower() ?? "";
-            string secretFeatures = SecretFeaturesEntry.Text?.ToLower() ?? ""; // Güvenlik alanı da eklendi
+            string secretFeatures = SecretFeaturesEntry.Text?.ToLower() ?? "";
 
-            return _highValueKeywords.Any(keyword => title.Contains(keyword) || secretFeatures.Contains(keyword));
+            return _noPhotoKeywords.Any(keyword => title.Contains(keyword) || secretFeatures.Contains(keyword));
         }
 
         private bool HasBrandInfo()
         {
             string title = TitleEntry.Text?.ToLower() ?? "";
-            string secretFeatures = SecretFeaturesEntry.Text?.ToLower() ?? ""; // Güvenlik alanı da eklendi
+            string secretFeatures = SecretFeaturesEntry.Text?.ToLower() ?? "";
 
             return _brandKeywords.Any(brand => title.Contains(brand) || secretFeatures.Contains(brand));
         }
 
         private async void OnPickImageClicked(object sender, EventArgs e)
         {
-            if (IsHighValueItem() || HasBrandInfo())
+            if (IsPhotoRestricted() || HasBrandInfo())
             {
-                await DisplayAlert("Güvenlik Uyarısı", "Telefon, bilgisayar, takı gibi yüksek değerli eşyaların fotoğrafları güvenlik amacıyla sisteme yüklenemez.", "Anladım");
+                await DisplayAlert("Güvenlik Uyarısı", "Telefon, bilgisayar gibi cihazların veya değerli materyallerin fotoğrafları güvenlik amacıyla sisteme yüklenemez.", "Anladım");
                 return;
             }
 
@@ -109,22 +114,22 @@ namespace CampusLostAndFound.App
         {
             string titleText = TitleEntry.Text?.ToLower() ?? "";
 
-            // 1. Başlıkta Marka Kontrolü
+            // 1. Marka Kontrolü (Başlıkta yasak)
             if (_brandKeywords.Any(brand => titleText.Contains(brand)))
             {
                 await DisplayAlert("Kritik Hata", "Lütfen ilan başlığına MARKA/MODEL yazmayın! Bu detayları sadece 'Güvenlik (Gizli Özellikler)' kısmına eklemelisiniz.", "Düzelt");
                 return;
             }
 
-            // 2. Başlıkta Lüks/Değerli Eşya Kontrolü (YENİ EKLENEN KISIM)
-            if (_highValueKeywords.Any(keyword => titleText.Contains(keyword)))
+            // 2. Çok Değerli Materyal Kontrolü (Altın, pırlanta vb. başlıkta yasak)
+            if (_forbiddenTitleKeywords.Any(keyword => titleText.Contains(keyword)))
             {
-                await DisplayAlert("Güvenlik Uyarısı", "İlan başlığına lüks veya değerli eşya ismi (altın, pırlanta, telefon, cüzdan vb.) yazamazsınız! Lütfen başlığa 'Değerli Eşya' gibi genel bir isim yazıp, asıl detayları 'Güvenlik' kısmına ekleyin.", "Düzelt");
+                await DisplayAlert("Güvenlik Uyarısı", "İlan başlığına değerli materyal ismi (altın, pırlanta vb.) yazamazsınız! Lütfen başlığa 'Takı/Eşya' gibi genel bir isim yazıp, asıl detayları 'Güvenlik' kısmına ekleyin.", "Düzelt");
                 return;
             }
 
-            // 3. Fotoğraf Yükleme İzni Kontrolü (Güvenlik kısmına yazılanlar için)
-            if (IsHighValueItem())
+            // 3. Fotoğraf Yükleme İzni Kontrolü
+            if (IsPhotoRestricted())
             {
                 _uploadedFileName = "yok.jpg";
             }
