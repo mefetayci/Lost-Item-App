@@ -24,8 +24,8 @@ namespace CampusLostAndFound.App
 
                 await DisplayAlert("Başarılı", $"{location} görevlisi olarak giriş yapıldı.", "Tamam");
 
-                // Ana sayfaya geri dön
-                await Navigation.PopAsync();
+                // DEĞİŞEN KISIM: Artık eski sayfaya geri dönmüyoruz, yeni istatistik paneline yönlendiriyoruz.
+                await Navigation.PushAsync(new AdminDashboardPage(location));
             }
             else
             {

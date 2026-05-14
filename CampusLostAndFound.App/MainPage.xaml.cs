@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using System.Linq;
+using System;
+using Microsoft.Maui.Graphics;
 
 namespace CampusLostAndFound.App
 {
@@ -17,6 +19,15 @@ namespace CampusLostAndFound.App
             FilterPicker.SelectedIndex = 0;
         }
 
+        public MainPage(string adminLocation)
+        {
+            InitializeComponent();
+            FilterPicker.SelectedIndex = 0;
+
+            GlobalIsAdmin = true;
+            GlobalAdminLocation = adminLocation;
+        }
+
         protected override async void OnAppearing()
         {
             base.OnAppearing();
@@ -30,6 +41,47 @@ namespace CampusLostAndFound.App
             }
 
             await LoadItemsFromApi();
+            UpdateContactInfo();
+        }
+
+        private async void OnRefreshing(object sender, EventArgs e)
+        {
+            await LoadItemsFromApi();
+            ItemsRefreshView.IsRefreshing = false;
+        }
+
+        // DEĞİŞEN KISIM BURASI: Görevli panelinde bilgi kutusu gizlendi
+        private void UpdateContactInfo()
+        {
+            // Eğer görevli girişi yapıldıysa bilgi kutusunu gizle ve metottan çık
+            if (GlobalIsAdmin)
+            {
+                ContactInfoContainer.IsVisible = false;
+                return;
+            }
+
+            // Burası sadece öğrenciler (normal kullanıcılar) için çalışacak
+            string selectedLocation = FilterPicker.SelectedItem?.ToString();
+
+            if (selectedLocation == "Maltepe Üniversitesi")
+            {
+                ContactInfoLabel.Text = "Kayıp Eşya Ofisi: 0216 626 10 50\nDahili: 2222 (Güvenlik Merkezi)";
+                ContactInfoContainer.IsVisible = true;
+            }
+            else if (selectedLocation == "City's AVM")
+            {
+                ContactInfoLabel.Text = "Danışma: 0212 373 33 33\nKonum: Zemin Kat No: 12";
+                ContactInfoContainer.IsVisible = true;
+            }
+            else if (selectedLocation == "Marmaray")
+            {
+                ContactInfoLabel.Text = "Çözüm Merkezi: 444 82 33\nE-posta: cozum@tcddtasimacilik.gov.tr";
+                ContactInfoContainer.IsVisible = true;
+            }
+            else
+            {
+                ContactInfoContainer.IsVisible = false;
+            }
         }
 
         private async void OnCorporateLoginClicked(object sender, EventArgs e)
@@ -42,7 +94,6 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                // Link localhost olarak güncellendi
                 string response = await client.GetStringAsync("http://localhost:5280/api/Items");
                 var items = JsonSerializer.Deserialize<List<Item>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -93,7 +144,12 @@ namespace CampusLostAndFound.App
             ItemsCollectionView.ItemsSource = filteredItems.ToList();
         }
 
-        private void OnFilterChanged(object sender, EventArgs e) => ApplyFilters();
+        private void OnFilterChanged(object sender, EventArgs e)
+        {
+            ApplyFilters();
+            UpdateContactInfo();
+        }
+
         private void OnSearchBarTextChanged(object sender, TextChangedEventArgs e) => ApplyFilters();
 
         private async void OnItemTapped(object sender, TappedEventArgs e)
@@ -125,7 +181,6 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                // Link localhost olarak güncellendi
                 var response = await client.DeleteAsync($"http://localhost:5280/api/Items/{_itemToHandoverId}");
                 if (response.IsSuccessStatusCode)
                 {
@@ -149,8 +204,26 @@ namespace CampusLostAndFound.App
         public string finderName { get; set; } = string.Empty;
         public string imageUrl { get; set; } = "yok.jpg";
 
-        // Link localhost olarak güncellendi
+        public DateTime createdDate { get; set; }
+
         public string FullImageUrl => $"http://localhost:5280/api/Items/proxy/{imageUrl}";
+
+        public bool IsOverOneYear => createdDate != default && (DateTime.Now - createdDate).TotalDays > 365;
+        public string WarningText => "⚠️ 1 yıldan uzun süredir kayıp (Açık Artırma/Arşiv statüsünde)";
+
+        public Color StatusColor
+        {
+            get
+            {
+                if (createdDate == default) return Colors.Transparent;
+
+                var totalDays = (DateTime.Now - createdDate).TotalDays;
+                if (totalDays > 365) return Colors.DarkRed;
+                if (totalDays > 180) return Colors.Red;
+                if (totalDays > 90) return Colors.DarkOrange;
+                return Colors.Transparent;
+            }
+        }
 
         public string secretAnswer { get; set; } = string.Empty;
         public bool IsAdminMode { get; set; }

@@ -20,35 +20,50 @@
                     </Picker.Items>
                 </Picker>
 
+                <Border x:Name="ContactInfoContainer" IsVisible="False" StrokeShape="RoundRectangle 8" BackgroundColor="#2D2D2D" Stroke="#512BD4" StrokeThickness="1" Padding="10" Margin="0,-5,0,10" HorizontalOptions="Center" WidthRequest="300">
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="ℹ️" FontSize="16" VerticalOptions="Center"/>
+                        <Label x:Name="ContactInfoLabel" Text="..." FontSize="12" TextColor="LightGray" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
                 <SearchBar x:Name="ItemSearchBar" Placeholder="Eşya Ara (Örn: Anahtar...)" TextChanged="OnSearchBarTextChanged" Margin="0,0,0,10"/>
 
                 <Button x:Name="AdminAddButton" Text="+ Yeni Eşya Ekle" IsVisible="False" Clicked="OnAddButtonClicked" BackgroundColor="#512BD4" TextColor="White" CornerRadius="20" HorizontalOptions="Center" Margin="0,0,0,10"/>
 
                 <Border StrokeShape="RoundRectangle 10" Padding="15" Stroke="#333333" StrokeThickness="1">
-                    <CollectionView x:Name="ItemsCollectionView">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Border StrokeShape="RoundRectangle 10" Padding="15" Stroke="#333333" StrokeThickness="1" Margin="0,0,0,10">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnItemTapped" CommandParameter="{Binding .}"/>
-                                    </Border.GestureRecognizers>
 
-                                    <Grid ColumnDefinitions="100, *">
-                                        <Image Grid.Column="0" Source="{Binding FullImageUrl}" HeightRequest="90" WidthRequest="90" Aspect="AspectFill" Margin="0,0,15,0" />
-                                        <VerticalStackLayout Grid.Column="1" Spacing="5">
-                                            <Label Text="{Binding category, StringFormat='📍 {0}'}" FontSize="12" TextColor="#512BD4" FontAttributes="Bold" />
-                                            <Label Text="{Binding title}" FontSize="18" FontAttributes="Bold" />
-                                            <Label Text="{Binding location, StringFormat='Bulunan Yer: {0}'}" FontSize="14" TextColor="Gray" />
-                                            <Label Text="{Binding finderName, StringFormat='Bulan: {0}'}" FontSize="12" TextColor="Gray" />
+                    <!-- YENİ: Aşağı Çekerek Yenileme (Pull-to-Refresh) Alanı -->
+                    <RefreshView x:Name="ItemsRefreshView" Refreshing="OnRefreshing" RefreshColor="#512BD4">
+                        <CollectionView x:Name="ItemsCollectionView">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border StrokeShape="RoundRectangle 10" Padding="15" Stroke="{Binding StatusColor}" StrokeThickness="2" Margin="0,0,0,10">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnItemTapped" CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
 
-                                            <Button x:Name="AdminDeliverButton" Text="Sahibine Teslim Et" BackgroundColor="#28a745" TextColor="White" CornerRadius="5" HeightRequest="35" Margin="0,10,0,0" 
-                                                    CommandParameter="{Binding id}" Clicked="OnHandOverButtonClicked" IsVisible="{Binding IsAdminMode}"/>
-                                        </VerticalStackLayout>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                                        <Grid ColumnDefinitions="100, *">
+                                            <Image Grid.Column="0" Source="{Binding FullImageUrl}" HeightRequest="90" WidthRequest="90" Aspect="AspectFill" Margin="0,0,15,0" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                                <Label Text="{Binding category, StringFormat='📍 {0}'}" FontSize="12" TextColor="#512BD4" FontAttributes="Bold" />
+                                                <Label Text="{Binding title}" FontSize="18" FontAttributes="Bold" />
+                                                <Label Text="{Binding location, StringFormat='Bulunan Yer: {0}'}" FontSize="14" TextColor="Gray" />
+                                                <Label Text="{Binding finderName, StringFormat='Bulan: {0}'}" FontSize="12" TextColor="Gray" />
+
+                                                <Label Text="{Binding WarningText}" IsVisible="{Binding IsOverOneYear}" TextColor="DarkRed" FontSize="11" FontAttributes="Bold" Margin="0,5,0,0"/>
+
+                                                <Button x:Name="AdminDeliverButton" Text="Sahibine Teslim Et" BackgroundColor="#28a745" TextColor="White" CornerRadius="5" HeightRequest="35" Margin="0,10,0,0" 
+                                                        CommandParameter="{Binding id}" Clicked="OnHandOverButtonClicked" IsVisible="{Binding IsAdminMode}"/>
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </RefreshView>
+                    <!-- YENİ ALANIN SONU -->
+
                 </Border>
             </VerticalStackLayout>
         </ScrollView>

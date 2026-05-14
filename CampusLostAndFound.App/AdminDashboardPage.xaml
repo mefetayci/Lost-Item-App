@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CampusLostAndFound.App.AdminDashboardPage"
+             Title="Yönetici Paneli"
+             BackgroundColor="#121212">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="Sistem İstatistikleri" FontSize="24" FontAttributes="Bold" TextColor="White" Margin="0,0,0,10"/>
+
+            <!-- Aktif İlanlar Kartı -->
+            <Frame BackgroundColor="#1E1E1E" BorderColor="#2C2C2C" CornerRadius="10" Padding="20">
+                <HorizontalStackLayout Spacing="20" VerticalOptions="Center">
+                    <Label Text="📦" FontSize="40" VerticalOptions="Center"/>
+                    <VerticalStackLayout VerticalOptions="Center">
+                        <Label Text="Bekleyen Kayıp Eşyalar" FontSize="16" TextColor="#A0A0A0"/>
+                        <Label x:Name="ActiveItemsLabel" Text="..." FontSize="32" FontAttributes="Bold" TextColor="#4CAF50"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Teslim Edilenler Kartı -->
+            <Frame BackgroundColor="#1E1E1E" BorderColor="#2C2C2C" CornerRadius="10" Padding="20">
+                <HorizontalStackLayout Spacing="20" VerticalOptions="Center">
+                    <Label Text="✅" FontSize="40" VerticalOptions="Center"/>
+                    <VerticalStackLayout VerticalOptions="Center">
+                        <Label Text="Sahibine Teslim Edilenler" FontSize="16" TextColor="#A0A0A0"/>
+                        <Label x:Name="DeliveredItemsLabel" Text="..." FontSize="32" FontAttributes="Bold" TextColor="#2196F3"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- YENİ: Arşiv/Satış Kartı -->
+            <Frame BackgroundColor="#1E1E1E" BorderColor="#CC0000" CornerRadius="10" Padding="20">
+                <HorizontalStackLayout Spacing="20" VerticalOptions="Center">
+                    <Label Text="⚖️" FontSize="40" VerticalOptions="Center"/>
+                    <VerticalStackLayout VerticalOptions="Center">
+                        <Label Text="Arşiv/Açık Artırma Bekleyen" FontSize="16" TextColor="#A0A0A0"/>
+                        <Label x:Name="ArchivedItemsLabel" Text="..." FontSize="32" FontAttributes="Bold" TextColor="#FF4444"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- En Çok Unutulan Lokasyonlar -->
+            <Label Text="En Riskli Lokasyonlar" FontSize="20" FontAttributes="Bold" TextColor="White" Margin="0,15,0,5"/>
+
+            <Frame BackgroundColor="#1E1E1E" BorderColor="#2C2C2C" CornerRadius="10" Padding="20">
+                <VerticalStackLayout x:Name="LocationsStackLayout" Spacing="10">
+                    <Label x:Name="LoadingLabel" Text="Yükleniyor..." TextColor="#A0A0A0" HorizontalOptions="Center"/>
+                    <!-- Lokasyonlar buraya kod ile dinamik eklenecek -->
+                </VerticalStackLayout>
+            </Frame>
+
+            <Button Text="İlan Listesine Git" 
+                    BackgroundColor="#4CAF50" 
+                    TextColor="White" 
+                    CornerRadius="8" 
+                    HeightRequest="50"
+                    Margin="0,20,0,0"
+                    Clicked="OnGoToListClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
