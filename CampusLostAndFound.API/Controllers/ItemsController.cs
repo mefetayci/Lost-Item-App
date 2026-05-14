@@ -56,8 +56,17 @@ namespace CampusLostAndFound.API.Controllers
             var item = await _context.Items.FindAsync(id);
             if (item == null) return NotFound();
 
-            _context.Items.Remove(item);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Items.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Çift tıklama durumunda veya zaten silinmiş bir veriyi tekrar silmeye 
+                // çalışırken sistemin çökmesini engeller, sessizce NotFound döner.
+                return NotFound();
+            }
 
             return NoContent();
         }
