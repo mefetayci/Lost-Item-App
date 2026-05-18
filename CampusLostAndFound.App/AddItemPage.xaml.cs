@@ -8,7 +8,6 @@ namespace CampusLostAndFound.App
         private string _uploadedFileName = "yok.jpg";
         private string _adminLocation;
 
-        // SADECE FOTOĞRAF YÜKLEMEYİ ENGELLEYENLER (Başlığa yazmak serbest)
         private readonly List<string> _noPhotoKeywords = new List<string>
         {
             "telefon", "bilgisayar", "laptop", "tablet", "ipad", "macbook", "dizüstü",
@@ -16,13 +15,11 @@ namespace CampusLostAndFound.App
             "pırlanta", "altın", "gümüş", "elmas"
         };
 
-        // BAŞLIĞA YAZILMASI KESİNLİKLE YASAK OLANLAR (Sadece çok değerli materyaller)
         private readonly List<string> _forbiddenTitleKeywords = new List<string>
         {
             "pırlanta", "altın", "gümüş", "elmas"
         };
 
-        // BAŞLIKTA YASAK OLAN MARKALAR
         private readonly List<string> _brandKeywords = new List<string>
         {
             "apple", "iphone", "macbook", "ipad", "airpods", "samsung", "galaxy",
@@ -93,7 +90,8 @@ namespace CampusLostAndFound.App
                     content.Add(fileContent, "file", result.FileName);
 
                     HttpClient client = new HttpClient();
-                    var response = await client.PostAsync("http://localhost:5280/api/Items/upload-image", content);
+                    // EMÜLATÖR İÇİN 10.0.2.2 OLARAK GÜNCELLENDİ
+                    var response = await client.PostAsync("http://10.0.2.2:5280/api/Items/upload-image", content);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -114,21 +112,18 @@ namespace CampusLostAndFound.App
         {
             string titleText = TitleEntry.Text?.ToLower() ?? "";
 
-            // 1. Marka Kontrolü (Başlıkta yasak)
             if (_brandKeywords.Any(brand => titleText.Contains(brand)))
             {
                 await DisplayAlert("Kritik Hata", "Lütfen ilan başlığına MARKA/MODEL yazmayın! Bu detayları sadece 'Güvenlik (Gizli Özellikler)' kısmına eklemelisiniz.", "Düzelt");
                 return;
             }
 
-            // 2. Çok Değerli Materyal Kontrolü (Altın, pırlanta vb. başlıkta yasak)
             if (_forbiddenTitleKeywords.Any(keyword => titleText.Contains(keyword)))
             {
                 await DisplayAlert("Güvenlik Uyarısı", "İlan başlığına değerli materyal ismi (altın, pırlanta vb.) yazamazsınız! Lütfen başlığa 'Takı/Eşya' gibi genel bir isim yazıp, asıl detayları 'Güvenlik' kısmına ekleyin.", "Düzelt");
                 return;
             }
 
-            // 3. Fotoğraf Yükleme İzni Kontrolü
             if (IsPhotoRestricted())
             {
                 _uploadedFileName = "yok.jpg";
@@ -153,7 +148,8 @@ namespace CampusLostAndFound.App
                 var json = JsonSerializer.Serialize(newItem);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PostAsync("http://localhost:5280/api/Items", content);
+                // EMÜLATÖR İÇİN 10.0.2.2 OLARAK GÜNCELLENDİ
+                var response = await client.PostAsync("http://10.0.2.2:5280/api/Items", content);
 
                 if (response.IsSuccessStatusCode)
                 {
