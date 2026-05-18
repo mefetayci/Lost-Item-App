@@ -23,7 +23,8 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                var response = await client.GetAsync($"http://localhost:5280/api/Items/statistics/{_adminLocation}");
+                // EMÜLATÖR İÇİN 10.0.2.2 OLARAK GÜNCELLENDİ
+                var response = await client.GetAsync($"http://10.0.2.2:5280/api/Items/statistics/{_adminLocation}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -34,11 +35,8 @@ namespace CampusLostAndFound.App
 
                     if (stats != null)
                     {
-                        // EKRANDAKİ YAZILARA DEĞERLERİ ATADIĞIMIZ YER
                         ActiveItemsLabel.Text = stats.TotalActiveItems.ToString();
                         DeliveredItemsLabel.Text = stats.TotalDeliveredItems.ToString();
-
-                        // İŞTE EKSİK OLAN VE "..." KALMASINA SEBEP OLAN SATIR BUYDU:
                         ArchivedItemsLabel.Text = stats.TotalArchivedItems.ToString();
 
                         LoadingLabel.IsVisible = false;
@@ -76,15 +74,11 @@ namespace CampusLostAndFound.App
         }
     }
 
-    // JSON Verilerini eşlemek için yardımcı sınıflar
     public class StatisticsResponse
     {
         public int TotalActiveItems { get; set; }
         public int TotalDeliveredItems { get; set; }
-
-        // BU VERİYİ DE KARŞILAMAMIZ GEREKİYORDU
         public int TotalArchivedItems { get; set; }
-
         public List<LocationStat> FrequentLocations { get; set; }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Linq;
 using System;
+using System.Collections.ObjectModel;
 using Microsoft.Maui.Graphics;
 
 namespace CampusLostAndFound.App
@@ -11,17 +12,20 @@ namespace CampusLostAndFound.App
         public static string GlobalAdminLocation = string.Empty;
 
         private List<Item> _allItems = new List<Item>();
+        public ObservableCollection<Item> DisplayItems { get; set; } = new ObservableCollection<Item>();
         private int _itemToHandoverId;
 
         public MainPage()
         {
             InitializeComponent();
+            ItemsCollectionView.ItemsSource = DisplayItems;
             FilterPicker.SelectedIndex = 0;
         }
 
         public MainPage(string adminLocation)
         {
             InitializeComponent();
+            ItemsCollectionView.ItemsSource = DisplayItems;
             FilterPicker.SelectedIndex = 0;
 
             GlobalIsAdmin = true;
@@ -50,17 +54,14 @@ namespace CampusLostAndFound.App
             ItemsRefreshView.IsRefreshing = false;
         }
 
-        // DEĞİŞEN KISIM BURASI: Görevli panelinde bilgi kutusu gizlendi
         private void UpdateContactInfo()
         {
-            // Eğer görevli girişi yapıldıysa bilgi kutusunu gizle ve metottan çık
             if (GlobalIsAdmin)
             {
                 ContactInfoContainer.IsVisible = false;
                 return;
             }
 
-            // Burası sadece öğrenciler (normal kullanıcılar) için çalışacak
             string selectedLocation = FilterPicker.SelectedItem?.ToString();
 
             if (selectedLocation == "Maltepe Üniversitesi")
@@ -94,7 +95,7 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                string response = await client.GetStringAsync("http://localhost:5280/api/Items");
+                string response = await client.GetStringAsync("http://10.0.2.2:5280/api/Items");
                 var items = JsonSerializer.Deserialize<List<Item>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 foreach (var item in items)
@@ -107,7 +108,8 @@ namespace CampusLostAndFound.App
             }
             catch (Exception ex)
             {
-                await Application.Current!.Windows[0].Page!.DisplayAlert("Hata", "Veriler çekilemedi: " + ex.Message, "Tamam");
+                // Çökme sorunu düzeltildi!
+                await Application.Current!.MainPage!.DisplayAlert("Hata", "Veriler çekilemedi: " + ex.Message, "Tamam");
             }
         }
 
@@ -141,7 +143,14 @@ namespace CampusLostAndFound.App
                     (i.location != null && i.location.ToLower().Contains(keyword)));
             }
 
-            ItemsCollectionView.ItemsSource = filteredItems.ToList();
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                DisplayItems.Clear();
+                foreach (var item in filteredItems)
+                {
+                    DisplayItems.Add(item);
+                }
+            });
         }
 
         private void OnFilterChanged(object sender, EventArgs e)
@@ -181,7 +190,7 @@ namespace CampusLostAndFound.App
             try
             {
                 HttpClient client = new HttpClient();
-                var response = await client.DeleteAsync($"http://localhost:5280/api/Items/{_itemToHandoverId}");
+                var response = await client.DeleteAsync($"http://10.0.2.2:5280/api/Items/{_itemToHandoverId}");
                 if (response.IsSuccessStatusCode)
                 {
                     await DisplayAlert("Başarılı", "Eşya teslim edildi.", "Tamam");
@@ -206,7 +215,7 @@ namespace CampusLostAndFound.App
 
         public DateTime createdDate { get; set; }
 
-        public string FullImageUrl => $"http://localhost:5280/api/Items/proxy/{imageUrl}";
+        public string FullImageUrl => $"http://10.0.2.2:5280/api/Items/proxy/{imageUrl}";
 
         public bool IsOverOneYear => createdDate != default && (DateTime.Now - createdDate).TotalDays > 365;
         public string WarningText => "⚠️ 1 yıldan uzun süredir kayıp (Açık Artırma/Arşiv statüsünde)";
